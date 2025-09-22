@@ -28,7 +28,7 @@ const LeftPanel = () => {
     if (!supabase) return;
 
     const channel = supabase
-      .channel("messages_updates")
+      .channel(`messages-updates-${Date.now()}`)
       .on(
         "postgres_changes",
         {
@@ -57,20 +57,23 @@ const LeftPanel = () => {
   }, [conversations, selectedConversation, setSelectedConversation]);
 
   return (
-    <div className="w-1/4 border-gray-600 border-r">
+    <div className={`
+      w-full md:w-1/4 border-gray-600 md:border-r
+      ${selectedConversation ? 'hidden md:block' : 'block'}
+    `}>
       <div className="sticky top-0 bg-left-panel z-10">
         {/* Header */}
         <div className="flex justify-between bg-gray-primary p-3 items-center">
           <SupabaseUserMenu />
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <UserListDialog />
             <ThemeSwitch />
           </div>
         </div>
         <div className="p-3 flex items-center">
           {/* Search */}
-          <div className="relative h-10 mx-3 flex-1">
+          <div className="relative h-10 mx-1 md:mx-3 flex-1">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10"
               size={18}

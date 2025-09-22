@@ -25,11 +25,11 @@ const MessageInput = () => {
   };
 
   return (
-    <div className="bg-gray-primary p-2 flex gap-4 items-center">
-      <div className="relative flex gap-2 ml-2">
+    <div className="bg-gray-primary p-2 md:p-4 flex gap-2 md:gap-4 items-center">
+      <div className="relative flex gap-2 ml-1 md:ml-2">
         <MediaDropdown />
       </div>
-      <form onSubmit={handleSendTextMessage} className="w-full flex gap-3">
+      <form onSubmit={handleSendTextMessage} className="w-full flex gap-2 md:gap-3">
         <div className="flex-1">
           <Input
             type="text"
@@ -39,14 +39,14 @@ const MessageInput = () => {
             onChange={(e) => setMsgText(e.target.value)}
           />
         </div>
-        <div className="mr-4 flex items-center gap-3">
+        <div className="mr-2 md:mr-4 flex items-center gap-2 md:gap-3">
           {msgText.length > 0 ? (
             <Button
               type="submit"
               size={"sm"}
-              className="bg-transparent text-foreground hover:bg-transparent"
+              className="bg-transparent text-foreground hover:bg-transparent p-2"
             >
-              <Send />
+              <Send size={18} className="md:w-5 md:h-5" />
             </Button>
           ) : (
             <Button

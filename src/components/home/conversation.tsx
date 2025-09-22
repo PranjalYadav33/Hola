@@ -23,14 +23,14 @@ const Conversation = ({ conversation }: { conversation: any }) => {
   return (
     <>
       <div
-        className={`flex gap-2 items-center p-3 hover:bg-chat-hover cursor-pointer
+        className={`flex gap-2 md:gap-3 items-center p-2 md:p-3 hover:bg-chat-hover cursor-pointer
 					${activeBgClass ? "bg-gray-tertiary" : ""}
 				`}
         onClick={() => setSelectedConversation(conversation)}
       >
-        <Avatar className="border border-gray-900 overflow-visible relative">
+        <Avatar className="border border-gray-900 overflow-visible relative w-10 h-10 md:w-12 md:h-12">
           {conversation.isOnline && (
-            <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-foreground" />
+            <div className="absolute top-0 right-0 w-2 h-2 md:w-2.5 md:h-2.5 bg-green-500 rounded-full border-2 border-foreground" />
           )}
           <AvatarImage
             src={conversationImage || "/placeholder.png"}
@@ -40,10 +40,10 @@ const Conversation = ({ conversation }: { conversation: any }) => {
             <div className="animate-pulse bg-gray-tertiary w-full h-full rounded-full"></div>
           </AvatarFallback>
         </Avatar>
-        <div className="w-full">
+        <div className="w-full min-w-0">
           <div className="flex items-center">
-            <h3 className="text-sm font-medium">{conversationName}</h3>
-            <span className="text-xs text-gray-500 ml-auto">
+            <h3 className="text-sm md:text-base font-medium truncate">{conversationName}</h3>
+            <span className="text-xs text-gray-500 ml-auto whitespace-nowrap">
               {formatDate(
                 lastMessage?._creationTime || conversation._creationTime
               )}

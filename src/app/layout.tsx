@@ -6,7 +6,6 @@ import CallProvider from "@/components/call/call-manager";
 import { Toaster } from "react-hot-toast";
 import { SupabaseAuthProvider } from "@/providers/supabase-auth-provider";
 import AuthGate from "@/components/auth-gate";
-import CallDebugStatus from "@/components/call/call-debug-status";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,6 +15,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/hola-logo.svg",
   },
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
 
 export default function RootLayout({
@@ -38,7 +38,6 @@ export default function RootLayout({
                 {children}
               </AuthGate>
               <Toaster />
-              <CallDebugStatus />
             </CallProvider>
           </SupabaseAuthProvider>
         </ThemeProvider>

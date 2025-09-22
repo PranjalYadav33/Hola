@@ -14,6 +14,7 @@ export function getSupabaseClient(): SupabaseClient | null {
     }
     return null;
   }
+  
   client = createClient(url, anonKey, {
     auth: {
       persistSession: true,
@@ -21,8 +22,13 @@ export function getSupabaseClient(): SupabaseClient | null {
       detectSessionInUrl: true,
     },
     realtime: {
-      params: { eventsPerSecond: 3 },
+      params: { 
+        eventsPerSecond: 10,
+        heartbeatIntervalMs: 30000,
+        reconnectAfterMs: (tries: number) => Math.min(tries * 1000, 30000)
+      },
     },
   });
+  
   return client;
 }

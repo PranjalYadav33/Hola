@@ -47,60 +47,28 @@ export class SignalingService {
     }
   }
 
-  startListening() {
-    if (!this.supabase) {
-      console.error('Supabase client not available for real-time listening');
-      return;
+  startListening(onSignal: (signal: CallSignal) => void): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
 
-    console.log(`Starting to listen for call signals for user: ${this.currentUserId}`);
-
+    const channelName = `call-signals-${this.userId}-${Date.now()}`;
     this.subscription = this.supabase
-      .channel(`call_signals_${this.currentUserId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'call_signals',
-          filter: `to_user=eq.${this.currentUserId}`,
+          filter: `to_user=eq.${this.userId}`,
         },
-        (payload) => {
-          console.log('Received call signal:', payload);
+        (payload: any) => {
           const signal = payload.new as CallSignal;
-          
-          if (signal && signal.signal_type && signal.from_user) {
-            console.log(`Processing ${signal.signal_type} signal from ${signal.from_user}`);
-            this.onSignalCallback?.(signal);
-            
-            // Clean up the signal after processing
-            this.deleteSignal(signal.id);
-          } else {
-            console.error('Invalid signal received:', signal);
-          }
+          onSignal(signal);
         }
       )
-      .subscribe((status) => {
-        console.log('Call signals subscription status:', status);
-        
-        if (status === 'SUBSCRIBED') {
-          console.log('Successfully subscribed to call signals');
-        } else if (status === 'CLOSED') {
-          console.warn('Call signals subscription closed, attempting to reconnect...');
-          // Attempt to reconnect after a delay
-          setTimeout(() => {
-            if (!this.subscription || this.subscription.state === 'closed') {
-              this.startListening();
-            }
-          }, 3000);
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error('Call signals subscription error, retrying...');
-          setTimeout(() => {
-            this.startListening();
-          }, 5000);
-        }
-      });
-  }
+      .subscribe();
 
   stopListening() {
     if (this.subscription) {

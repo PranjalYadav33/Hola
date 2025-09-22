@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Phone, Video, X } from "lucide-react";
+import { Phone, Video, X, ArrowLeft } from "lucide-react";
 import MessageInput from "./message-input";
 import MessageContainer from "./message-container";
 import ChatPlaceHolder from "@/components/home/chat-placeholder";
@@ -64,12 +64,23 @@ const RightPanel = () => {
   };
 
   return (
-    <div className="w-3/4 flex flex-col">
+    <div className={`
+      w-full md:w-3/4 flex flex-col
+      ${selectedConversation ? 'block' : 'hidden md:block'}
+    `}>
       <div className="w-full sticky top-0 z-50">
         {/* Header */}
         <div className="flex justify-between bg-gray-primary p-3">
-          <div className="flex gap-3 items-center">
-            <Avatar>
+          <div className="flex gap-2 md:gap-3 items-center">
+            {/* Back button for mobile */}
+            <button 
+              onClick={() => setSelectedConversation(null)}
+              className="md:hidden hover:opacity-80"
+              title="Back to conversations"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <Avatar className="w-8 h-8 md:w-10 md:h-10">
               <AvatarImage
                 src={conversationImage || "/placeholder.png"}
                 className="object-cover"
@@ -79,7 +90,7 @@ const RightPanel = () => {
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <p>{conversationName}</p>
+              <p className="text-sm md:text-base">{conversationName}</p>
               {isOnline ? (
                 <p className="text-[0.66rem]">Online</p>
               ) : (
@@ -92,12 +103,12 @@ const RightPanel = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-7 mr-5">
+          <div className="flex items-center gap-3 md:gap-7 mr-2 md:mr-5">
             <button onClick={handleAudioCall} title="Audio call" className="hover:opacity-80">
-              <Phone size={20} />
+              <Phone size={18} className="md:w-5 md:h-5" />
             </button>
             <button onClick={handleVideoCall} title="Video call" className="hover:opacity-80">
-              <Video size={23} />
+              <Video size={20} className="md:w-6 md:h-6" />
             </button>
             <X
               size={16}

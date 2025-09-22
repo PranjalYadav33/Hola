@@ -62,8 +62,9 @@ export function subscribeToMessages(
 ) {
   const supabase = getSupabaseClient();
   if (!supabase) return () => {};
+  
   const channel = supabase
-    .channel(`conv:${conversationId}`)
+    .channel(`messages-${conversationId}-${Date.now()}`)
     .on(
       "postgres_changes",
       {

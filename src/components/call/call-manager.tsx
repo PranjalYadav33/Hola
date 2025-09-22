@@ -140,41 +140,36 @@ export default function CallProvider({ children }: CallProviderProps) {
     setCallStartTime(null);
   }, [peerConnection, callState.localStream, callState.isInCall, callStartTime, stopIncomingCallNotification, showCallEndedNotification, incomingCallNotification]);
 
-  const handleIncomingSignal = useCallback(async (signal: CallSignal) => {
-    console.log('Handling incoming signal:', signal.signal_type, signal);
-    
-    switch (signal.signal_type) {
+  const handleIncomingSignal = useCallback((signal: CallSignal) => {
+    switch (signal.signal_data.type) {
       case 'call-request':
-        console.log('Processing call-request from:', signal.from_user);
+        // Ignore if we're already in a call
+        if (callState.isActive || callState.isIncomingCall) {
+          return;
+        }
         
         // Ensure we have valid signal data
         if (!signal.signal_data || !signal.signal_data.type) {
-          console.error('Invalid call request signal data:', signal);
           return;
         }
         
         setIncomingCallData(signal);
-        setCallState(prev => {
-          const newState = {
-            ...prev,
-            isIncomingCall: true,
-            callType: signal.signal_data.type,
-            remoteUserId: signal.from_user,
-            conversationId: signal.conversation_id,
-          };
-          console.log('Updated call state for incoming call:', newState);
-          return newState;
-        });
+        setCallState(prev => ({
+          ...prev,
+          isIncomingCall: true,
+          callType: signal.signal_data.type,
+          remoteUserId: signal.from_user,
+          conversationId: signal.conversation_id,
+        }));
 
         // Start notification for incoming call
         const callerName = signal.signal_data.callerName || 'Unknown';
-        console.log('Starting incoming call notification for:', callerName);
         
         try {
           const notification = startIncomingCallNotification(callerName, signal.signal_data.type);
           setIncomingCallNotification(notification);
         } catch (error) {
-          console.error('Error starting call notification:', error);
+          // Silently handle notification errors
         }
         break;
 
