@@ -141,21 +141,41 @@ export default function CallProvider({ children }: CallProviderProps) {
   }, [peerConnection, callState.localStream, callState.isInCall, callStartTime, stopIncomingCallNotification, showCallEndedNotification, incomingCallNotification]);
 
   const handleIncomingSignal = useCallback(async (signal: CallSignal) => {
+    console.log('Handling incoming signal:', signal.signal_type, signal);
+    
     switch (signal.signal_type) {
       case 'call-request':
+        console.log('Processing call-request from:', signal.from_user);
+        
+        // Ensure we have valid signal data
+        if (!signal.signal_data || !signal.signal_data.type) {
+          console.error('Invalid call request signal data:', signal);
+          return;
+        }
+        
         setIncomingCallData(signal);
-        setCallState(prev => ({
-          ...prev,
-          isIncomingCall: true,
-          callType: signal.signal_data.type,
-          remoteUserId: signal.from_user,
-          conversationId: signal.conversation_id,
-        }));
+        setCallState(prev => {
+          const newState = {
+            ...prev,
+            isIncomingCall: true,
+            callType: signal.signal_data.type,
+            remoteUserId: signal.from_user,
+            conversationId: signal.conversation_id,
+          };
+          console.log('Updated call state for incoming call:', newState);
+          return newState;
+        });
 
         // Start notification for incoming call
         const callerName = signal.signal_data.callerName || 'Unknown';
-        const notification = startIncomingCallNotification(callerName, signal.signal_data.type);
-        setIncomingCallNotification(notification);
+        console.log('Starting incoming call notification for:', callerName);
+        
+        try {
+          const notification = startIncomingCallNotification(callerName, signal.signal_data.type);
+          setIncomingCallNotification(notification);
+        } catch (error) {
+          console.error('Error starting call notification:', error);
+        }
         break;
 
       case 'call-accept':

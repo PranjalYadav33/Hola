@@ -48,10 +48,15 @@ export class SignalingService {
   }
 
   startListening() {
-    if (!this.supabase) return;
+    if (!this.supabase) {
+      console.error('Supabase client not available for real-time listening');
+      return;
+    }
+
+    console.log(`Starting to listen for call signals for user: ${this.currentUserId}`);
 
     this.subscription = this.supabase
-      .channel('call_signals')
+      .channel(`call_signals_${this.currentUserId}`)
       .on(
         'postgres_changes',
         {
@@ -61,14 +66,40 @@ export class SignalingService {
           filter: `to_user=eq.${this.currentUserId}`,
         },
         (payload) => {
+          console.log('Received call signal:', payload);
           const signal = payload.new as CallSignal;
-          this.onSignalCallback?.(signal);
           
-          // Clean up the signal after processing
-          this.deleteSignal(signal.id);
+          if (signal && signal.signal_type && signal.from_user) {
+            console.log(`Processing ${signal.signal_type} signal from ${signal.from_user}`);
+            this.onSignalCallback?.(signal);
+            
+            // Clean up the signal after processing
+            this.deleteSignal(signal.id);
+          } else {
+            console.error('Invalid signal received:', signal);
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Call signals subscription status:', status);
+        
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to call signals');
+        } else if (status === 'CLOSED') {
+          console.warn('Call signals subscription closed, attempting to reconnect...');
+          // Attempt to reconnect after a delay
+          setTimeout(() => {
+            if (!this.subscription || this.subscription.state === 'closed') {
+              this.startListening();
+            }
+          }, 3000);
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('Call signals subscription error, retrying...');
+          setTimeout(() => {
+            this.startListening();
+          }, 5000);
+        }
+      });
   }
 
   stopListening() {

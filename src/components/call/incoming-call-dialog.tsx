@@ -16,9 +16,16 @@ export default function IncomingCallDialog({
   onAccept, 
   onReject 
 }: IncomingCallDialogProps) {
+  console.log('IncomingCallDialog rendered:', { callerName, callType });
+  
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center">
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-white/10">
+        {/* Debug info */}
+        <div className="text-xs text-yellow-400 mb-2 text-center">
+          Incoming Call Dialog Active
+        </div>
+        
         {/* Incoming Call Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
