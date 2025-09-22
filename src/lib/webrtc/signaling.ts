@@ -15,7 +15,6 @@ export interface CallSignal {
 export class SignalingService {
   private supabase = getSupabaseClient();
   private currentUserId: string;
-  private onSignalCallback?: (signal: CallSignal) => void;
   private subscription: any;
 
   constructor(userId: string) {
@@ -52,16 +51,16 @@ export class SignalingService {
       this.subscription.unsubscribe();
     }
 
-    const channelName = `call-signals-${this.userId}-${Date.now()}`;
+    const channelName = `call-signals-${this.currentUserId}-${Date.now()}`;
     this.subscription = this.supabase
-      .channel(channelName)
+      ?.channel(channelName)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'call_signals',
-          filter: `to_user=eq.${this.userId}`,
+          filter: `to_user=eq.${this.currentUserId}`,
         },
         (payload: any) => {
           const signal = payload.new as CallSignal;
@@ -69,15 +68,12 @@ export class SignalingService {
         }
       )
       .subscribe();
+  }
 
   stopListening() {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  }
-
-  onSignal(callback: (signal: CallSignal) => void) {
-    this.onSignalCallback = callback;
   }
 
   private async deleteSignal(signalId: string) {

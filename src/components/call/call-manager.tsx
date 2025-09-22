@@ -140,11 +140,11 @@ export default function CallProvider({ children }: CallProviderProps) {
     setCallStartTime(null);
   }, [peerConnection, callState.localStream, callState.isInCall, callStartTime, stopIncomingCallNotification, showCallEndedNotification, incomingCallNotification]);
 
-  const handleIncomingSignal = useCallback((signal: CallSignal) => {
+  const handleIncomingSignal = useCallback(async (signal: CallSignal) => {
     switch (signal.signal_data.type) {
       case 'call-request':
         // Ignore if we're already in a call
-        if (callState.isActive || callState.isIncomingCall) {
+        if (callState.isInCall || callState.isIncomingCall) {
           return;
         }
         
@@ -227,7 +227,7 @@ export default function CallProvider({ children }: CallProviderProps) {
         endCall();
         break;
     }
-  }, [peerConnection, callState.callType, endCall, startIncomingCallNotification, showCallStartedNotification]);
+  }, [peerConnection, callState.callType, callState.isInCall, callState.isIncomingCall, endCall, startIncomingCallNotification, showCallStartedNotification]);
 
   // Now that handleIncomingSignal is stable, set up signaling subscription
   useEffect(() => {
@@ -236,8 +236,7 @@ export default function CallProvider({ children }: CallProviderProps) {
     const signaling = new SignalingService(user.id);
     setSignalingService(signaling);
 
-    signaling.onSignal(handleIncomingSignal);
-    signaling.startListening();
+    signaling.startListening(handleIncomingSignal);
 
     return () => {
       signaling.stopListening();
