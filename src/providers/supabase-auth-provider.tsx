@@ -27,24 +27,38 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       return;
     }
 
+    let mounted = true;
+
     // Get initial session
-    supabase.auth.getSession().then(({ data, error }) => {
-      if (error) {
-        console.error('Error getting session:', error);
-      } else {
-        console.log('Initial session:', { 
-          hasSession: !!data.session, 
-          userId: data.session?.user?.id,
-          userEmail: data.session?.user?.email 
-        });
-        setSession(data.session);
-        setUser(data.session?.user ?? null);
+    const getInitialSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+        } else if (mounted) {
+          console.log('Initial session:', { 
+            hasSession: !!data.session, 
+            userId: data.session?.user?.id,
+            userEmail: data.session?.user?.email 
+          });
+          setSession(data.session);
+          setUser(data.session?.user ?? null);
+        }
+      } catch (error) {
+        console.error('Error in getInitialSession:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
-    });
+    };
+
+    getInitialSession();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (!mounted) return;
+
       console.log('Auth state change:', { 
         event, 
         hasSession: !!newSession, 
@@ -58,6 +72,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       // Handle specific auth events
       if (event === 'SIGNED_IN') {
         console.log('User signed in successfully');
+        // Force a small delay to ensure session is fully established
+        setTimeout(() => {
+          if (mounted) {
+            setLoading(false);
+          }
+        }, 100);
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out');
       } else if (event === 'TOKEN_REFRESHED') {
@@ -68,6 +88,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     });
 
     return () => {
+      mounted = false;
       subscription?.unsubscribe();
     };
   }, []);

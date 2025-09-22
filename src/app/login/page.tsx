@@ -1,13 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, Suspense } from "react";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSupabaseAuth } from "@/providers/supabase-auth-provider";
 import Image from "next/image";
 import { Lock, Mail } from "lucide-react";
 
-export default function LoginPage() {
+function LoginContent() {
   const supabase = getSupabaseClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -341,5 +341,20 @@ export default function LoginPage() {
         <p className="mt-2">© {new Date().getFullYear()} Hola. All Rights Reserved.</p>
       </footer>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-900">
+        <div className="text-center text-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
